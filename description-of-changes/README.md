@@ -8,4 +8,6 @@ In order to ease the usage of the Project View, let's encode the semantics in co
 * Reduction of cognitive load by making the representation of members same as in the code  
 ## CONs
 * Names are not aligned anymore
-* Implementation increases the code complexity (if it were a matter of config, then there would be no drawbacks).
+* Implementation increases the code complexity (if it were a matter of config, then there would be no drawbacks).  
+Original idea evolved from this:  
+![Proof of concept picture](/description-of-changes/POC-0-types-mock.png)
