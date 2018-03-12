@@ -16,6 +16,7 @@ import com.intellij.ui.speedSearch.SpeedSearchUtil;
 import com.intellij.util.ui.tree.TreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.omg.PortableInterceptor.ORBInitInfoPackage.DuplicateNameHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +36,8 @@ public class NodeRenderer extends ColoredTreeCellRenderer {
 
     ItemPresentation p0 = getPresentation(node);
 
+    String grayed_type = "";
+
     if (p0 instanceof PresentationData) {
       PresentationData presentation = (PresentationData)p0;
       Color color = node instanceof NodeDescriptor ? ((NodeDescriptor)node).getColor() : null;
@@ -46,13 +49,37 @@ public class NodeRenderer extends ColoredTreeCellRenderer {
         String text = presentation.getPresentableText();
         if (StringUtil.isEmpty(text)) text = value.toString();
         text = tree.convertValueToText(text, selected, expanded, leaf, row, hasFocus);
+        String[] text_parts = text.split(":");
+        text = text_parts[0];
+        if (text_parts.length>1) {
+          grayed_type = text_parts[1] + " ";
+        }
         SimpleTextAttributes simpleTextAttributes = getSimpleTextAttributes(
           presentation, forcedForeground != null ? forcedForeground : color, node);
-        append(text, simpleTextAttributes);
         String location = presentation.getLocationString();
         if (!StringUtil.isEmpty(location)) {
           SimpleTextAttributes attributes = SimpleTextAttributes.merge(simpleTextAttributes, SimpleTextAttributes.GRAYED_ATTRIBUTES);
           append(presentation.getLocationPrefix() + location + presentation.getLocationSuffix(), attributes, false);
+        } else {
+          Color type_color = new Color(100,100,100);
+          SimpleTextAttributes type_attributes = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, type_color);
+          append(grayed_type, type_attributes, false);
+          String[] parameters = text.split("\\(");
+          String name = parameters[0];
+          String params = "";
+          if (parameters.length>1) {
+            params = "("+parameters[1];
+          } else {
+            if (text.endsWith("()")) {
+              text.replaceAll("\\(\\).*","");
+              name = text;
+              params = "()";
+            }
+          }
+          append(name, simpleTextAttributes);
+          Color name_color = new Color(107,142,170); // is taken from from "member" icon
+          SimpleTextAttributes name_attr = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, name_color);
+          append(params, name_attr);
         }
       }
       else {
@@ -79,6 +106,8 @@ public class NodeRenderer extends ColoredTreeCellRenderer {
         String location = presentation.getLocationString();
         if (!StringUtil.isEmpty(location)) {
           append(presentation.getLocationPrefix() + location + presentation.getLocationSuffix(), SimpleTextAttributes.GRAY_ATTRIBUTES, false);
+        } else {
+          append(grayed_type, SimpleTextAttributes.GRAY_ATTRIBUTES, false);
         }
       }
 
